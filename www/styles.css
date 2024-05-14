@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Vidaloka&display=swap');
+
+body{
+  
+  font-family: 'Vidaloka', serif;
+  background-color: rgb(240, 240, 240);
+  
+}
+
+.shiny-output-error {
+  visibility: hidden;
+}
+.shiny-output-error:before {
+  visibility: hidden;
+}
+
+/* Header */
+.header{
+  background-color: rgb(255, 255, 255);
+  margin-top: 1%;
+  border-radius: 10px;
+  padding: 0.5vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.download-button{
+  display: grid;
+}
+
+/* Cards */
+.card{
+  background-color: white;
+  padding: 1vw;
+  border-radius: 7px;
+  display: flex;
+  margin-bottom: 5%;
+  justify-content: space-between;
+  align-items: flex-end;
+  border: 2px solid rgb(240, 240, 240);;
+}
+
+.icon{
+  height: 7vh;
+  background-color: var(--bgColor);
+  padding: 9px;
+  border-radius: 7px;
+  transform: var(--rotation);
+}
+
+/* Blocks */
+.block{
+  background-color: rgb(255,255,255);
+  border-radius: 10px;
+  padding-left: 1vw;
+  padding-top: 1vh;
+  padding-right: 1vw;
+}
+
+.block-graph{
+  display: grid;
+  justify-items: center;
+}
+
+/* Form group */
+.form-group {
+    margin-bottom: 0vh;
+}

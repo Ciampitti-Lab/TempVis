@@ -13,53 +13,54 @@ library(shinydashboard)
 
 obtaining_data <- function(file.source, file.path = NULL, GET.API = NULL){
   
-  # CSV 
-  if(file.source == "csv"){
+  # Local 
+  if(file.source == "txt"){
     
-    csv.data <- read.csv(file.path)
+    txt.data <- read.table(file.path,
+                         header = TRUE,
+                         sep = ",",
+                         row.names = NULL)
     
-    database <- csv.data %>%
-      mutate(DateTime = as.POSIXct(strptime(DateTime, format = "%d/%m/%Y %H/%M")))
+    colnames(txt.data) <- c("Group","Reading","DateTime")
+    txt.data <- txt.data[,-4]
+    
+    txt.data$Reading <- strsplit(as.character(txt.data$Reading), "/")
+    txt.data <- cbind(txt.data[, -2], do.call(rbind, txt.data$Reading))
+    txt.data$DateTime <- as.POSIXct(txt.data$DateTime, format = "%d/%m/%Y %H/%M")
+    
+    database <- gather(txt.data, key = "Device", value = "Reading", -Group, -DateTime)
+    
+    database <- database %>%
+      arrange(DateTime, Group)
+    
+    database$Reading <- as.numeric(database$Reading)
+    database$Device <- as.numeric(database$Device)
     
   }
   
-  # XLSX
-  if(file.source == "xlsx"){
-    
-    xlsx.data <- read.xlsx(file.path, sheetIndex = 1)
-    
-    database <- xlsx.data %>%
-      mutate(DateTime = as.POSIXct(strptime(DateTime, format = "%d/%m/%Y %H/%M")))
-    
-  }
-  
-  # NoSQL
+  # Remote
   if(file.source == "NoSQL"){
     
     response <- GET(GET.API)
     
-    json <- content(response, as = "text") %>% 
+    json <- content(response, as = "text", encoding = "UTF-8") %>% 
       fromJSON() %>%
-      select(-c(`LoRa RSSI`, `Wifi RSSI`, `_id`))
+      select(-c(`LoRa RSSI`, `Wifi RSSI`, `_id`)) %>%
+      rename(Group = group,
+             DateTime = dateTime,
+             Reading = readings)
     
     tibble_data <- as_tibble(json)
     
-    num_repeats <- ncol(tibble_data$reading)
+    tibble_data$Reading <- strsplit(as.character(tibble_data$Reading), "/")
+    tibble_data <- cbind(tibble_data[, -3], do.call(rbind, tibble_data$Reading))
+    tibble_data$DateTime <- as.POSIXct(tibble_data$DateTime, format = "%d/%m/%Y %H/%M")
     
-    repeated_tibble <- tibble_data %>%
-      select(-c(reading)) %>%
-      rename(Group = group) %>%
-      mutate(DateTime = as.POSIXct(strptime(dateTime, format = "%d/%m/%Y %H/%M"))) %>%
-      slice(rep(row_number(), each = num_repeats))
+    database <- gather(tibble_data, key = "Device", value = "Reading", -Group, -DateTime)
     
-    readings <- as_tibble(tibble_data$reading, .name_repair="universal")
+    database <- database %>%
+      arrange(DateTime, Group)
     
-    readings <- readings %>%
-      pivot_longer(cols = everything(), names_to = "Device", values_to = "Reading")
-    
-    readings$Device <- gsub("Device.", "", readings$Device)
-    
-    database <- bind_cols(repeated_tibble, readings)
     database$Reading <- as.numeric(database$Reading)
     database$Device <- as.numeric(database$Device)
     
@@ -67,9 +68,10 @@ obtaining_data <- function(file.source, file.path = NULL, GET.API = NULL){
   return(database)
   
 }
-#GET.API = ""
+#file.path <- "test.txt"
+#GET.API <- "http://127.0.0.1:5000/obtain"
 #data <- obtaining_data(file.source = "txt", file.path = "test.txt")
-#data <- obtaining_data(file.source = "NoSQL", GET.API = "")
+#data <- obtaining_data(file.source = "NoSQL", GET.API = "http://127.0.0.1:5000/obtain")
 
 # Generating graphics -----
 ## Last Readings ----
@@ -95,8 +97,8 @@ last_reading_graph <- function(data, group.selected){
   ggplotly(graph)
   
 }
-#group.selected = "2"
-last_reading_graph(data = data, group.selected = "3")
+#group.selected = "1"
+#last_reading_graph(data = data, group.selected = "1")
 
 ### Cards ----
 template <- function(icon, data_big, data_small, bgColor){
@@ -134,13 +136,13 @@ cards_last <- function(data){
     summarise(Mean = mean(Reading, na.rm = TRUE),
               Max = max(Reading, na.rm = TRUE),
               Min = min(Reading, na.rm = TRUE),
-              Difference = Max-Min)
+              Difference = var(Reading))
   
   lapply(choices, function(choice){
     
     column(
       width = 3,
-      template(icon = "history-icon.svg",
+      template(icon = "thermometer.svg",
                data_big = str_glue(round(last.readings.data$Mean[last.readings.data$Group==choice], 1), " °C", " ± ", round(last.readings.data$Difference[last.readings.data$Group==choice], 1)),
                data_small = str_glue("Block ", choice),
                bgColor = "--bgColor:rgb(0, 32, 96); --rotation:rotate(0)")
@@ -152,9 +154,15 @@ cards_last <- function(data){
 
 cards_max_min <- function(data, block, max.min){
   
+  last.time <- data %>%
+    group_by(Group) %>%
+    slice(n())
+  
+  dateTimes <- last.time$DateTime
+  
   data.last <- data %>%
-    filter(Group == block,
-           DateTime == tail(DateTime))
+    filter(DateTime == dateTimes) %>%
+    group_by(Group)
   
   if(max.min == "max"){
     arrow.direction <- "up"
@@ -186,7 +194,8 @@ curve_graph <- function(database, blockOrMean, group.selected, time.scale){
     if(time.scale == "hour"){
       curve.data <- database %>%
         filter(Group == group.selected) %>%
-        group_by(DateTime)
+        group_by(DateTime, Device) %>%
+        summarise(Reading = mean(Reading))
       
       graph <- ggplot(data = curve.data,
                       aes(x = DateTime, y = Reading, color = Device))+
@@ -198,7 +207,8 @@ curve_graph <- function(database, blockOrMean, group.selected, time.scale){
     if(time.scale == "day"){
       curve.data <- database %>%
         filter(Group == group.selected) %>%
-        group_by(Date = format(DateTime, "%Y-%m-%d"))
+        group_by(Date = format(DateTime, "%Y-%m-%d"), Device)%>%
+        summarise(Reading = mean(Reading))
       
       graph <- ggplot(data = curve.data,
                       aes(x = Date, y = Reading, color = Device))+
@@ -210,7 +220,8 @@ curve_graph <- function(database, blockOrMean, group.selected, time.scale){
     if(time.scale == "week"){
       curve.data <- database %>%
         filter(Group == group.selected) %>%
-        group_by(Week = format(DateTime, "%Y-%U") )
+        group_by(Week = format(DateTime, "%Y-%U"), Device) %>%
+        summarise(Reading = mean(Reading))
       
       graph <- ggplot(data = curve.data,
                       aes(x = Week, y = Reading, color = Device))+
@@ -222,7 +233,8 @@ curve_graph <- function(database, blockOrMean, group.selected, time.scale){
     if(time.scale == "month"){
       curve.data <- database %>%
         filter(Group == group.selected) %>%
-        group_by(Month = format(DateTime, "%Y-%m"))
+        group_by(Month = format(DateTime, "%Y-%m"), Device) %>%
+        summarise(Reading = mean(Reading))
       
       graph <- ggplot(data = curve.data,
                       aes(x = Month, y = Reading, color = Device))+

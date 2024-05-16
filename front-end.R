@@ -29,12 +29,6 @@ main_page <- function(data){
     
     br(),
     
-    ## Last readings by block (cards) ----
-    
-    fluidRow(
-      uiOutput(outputId = "lastReadingCard"),
-    ),
-    
     ## Last readings by block (graph) ----
     div(
       class = "block",
@@ -42,6 +36,9 @@ main_page <- function(data){
         "Last readings by block"
       ),
       hr(),
+      fluidRow(
+        uiOutput(outputId = "lastReadingCard"),
+      ),
       fluidRow(
         column(
           width = 8,

@@ -8,4 +8,4 @@ install.packages(required_packages, dependencies = TRUE)
 source("app.R")
 
 # Run the application
-tempvis(file.source = "NoSQL", GET.API = "")
+tempvis(file.source = "txt", file.path = "test.txt")

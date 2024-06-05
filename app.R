@@ -6,6 +6,7 @@ source("back-end.R")
 source("front-end.R")
 
 tempvis <- function(file.source, file.path = NULL, GET.API = NULL){
+  
   # Data ----
   if(file.source == "txt"){
     data <- obtaining_data(file.source = file.source, file.path = file.path)

@@ -103,10 +103,12 @@ last_reading_graph <- function(data, group.selected){
 ### Cards ----
 template <- function(icon, data_big, data_small, bgColor){
   
+  b64 <- base64enc::dataURI(file = icon, mime = "image/svg+xml")
+  
   div(
     class = "card",
-    img(
-      src = icon,
+    tags$img(
+      src = b64,
       style = bgColor,
       class = "icon"
     ),
@@ -142,7 +144,7 @@ cards_last <- function(data){
     
     column(
       width = 3,
-      template(icon = "thermometer.svg",
+      template(icon = "www/icons/thermometer.svg",
                data_big = str_glue(round(last.readings.data$Mean[last.readings.data$Group==choice], 1), " °C", " ± ", round(last.readings.data$Difference[last.readings.data$Group==choice], 1)),
                data_small = str_glue("Block ", choice),
                bgColor = "--bgColor:rgb(0, 32, 96); --rotation:rotate(0)")
@@ -177,7 +179,7 @@ cards_max_min <- function(data, block, max.min){
     bgColor <- "--bgColor:rgb(0, 176, 240); --rotation:rotate(270deg)"
   }
   
-  template(icon = paste("arrow-", arrow.direction, ".svg", sep = ""),
+  template(icon = paste("www/icons/arrow-", arrow.direction, ".svg", sep = ""),
            data_big = paste(data_big,"°C"),
            data_small = paste("Device", device),
            bgColor = bgColor)

@@ -11,7 +11,7 @@ main_page <- function(data){
     div(
       class = "header",
       tags$h2(
-        "Temperature sensors hub"
+        "Temperature sensors dashboard"
       ),
       div(
         class = "download-button",

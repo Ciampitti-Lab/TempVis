@@ -8,5 +8,5 @@ install.packages(required_packages, dependencies = TRUE)
 source("app.R")
 
 # Run the application
-tempvis(file.source = "txt", file.path = "test.txt")
-tempvis(file.source = "NoSQL", GET.API = "http://3.140.52.70/L6OLaOdyFLLvj7DLyeeeFpfFw61i9gWps2tKexzK1m8Sl1cG736SxqGCG76odf83/obtain")
+tempvis(file.source = "txt", file.path = "test.txt") # Local database
+#tempvis(file.source = "NoSQL", GET.API = "***************/obtain") # Remote database. Change the "*" to your API URL, but keep the "/obtain" endpoint

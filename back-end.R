@@ -52,6 +52,9 @@ obtaining_data <- function(file.source, file.path = NULL, GET.API = NULL){
     
     tibble_data <- as_tibble(json)
     
+    tibble_data[tibble_data==""]<-NA
+    tibble_data <- tibble_data %>% drop_na()
+    
     tibble_data$Reading <- strsplit(as.character(tibble_data$Reading), "/")
     tibble_data <- cbind(tibble_data[, -3], do.call(rbind, tibble_data$Reading))
     tibble_data$DateTime <- as.POSIXct(tibble_data$DateTime, format = "%d/%m/%Y %H/%M")
@@ -68,10 +71,6 @@ obtaining_data <- function(file.source, file.path = NULL, GET.API = NULL){
   return(database)
   
 }
-#file.path <- "test.txt"
-#GET.API <- "http://127.0.0.1:5000/obtain"
-#data <- obtaining_data(file.source = "txt", file.path = "test.txt")
-#data <- obtaining_data(file.source = "NoSQL", GET.API = "http://127.0.0.1:5000/obtain")
 
 # Generating graphics -----
 ## Last Readings ----
@@ -97,8 +96,6 @@ last_reading_graph <- function(data, group.selected){
   ggplotly(graph)
   
 }
-#group.selected = "1"
-#last_reading_graph(data = data, group.selected = "1")
 
 ### Cards ----
 template <- function(icon, data_big, data_small, bgColor){
@@ -158,6 +155,7 @@ cards_max_min <- function(data, block, max.min){
   
   last.time <- data %>%
     group_by(Group) %>%
+    filter(Group == block) %>%
     slice(n())
   
   dateTimes <- last.time$DateTime

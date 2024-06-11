@@ -6,7 +6,7 @@ source("back-end.R")
 source("front-end.R")
 
 tempvis <- function(file.source, file.path = NULL, GET.API = NULL){
-  
+
   # Data ----
   if(file.source == "txt"){
     data <- obtaining_data(file.source = file.source, file.path = file.path)
@@ -85,5 +85,5 @@ tempvis <- function(file.source, file.path = NULL, GET.API = NULL){
   }
   
   # App ----
-  shinyApp(ui, server, options=c(shiny.launch.browser = .rs.invokeShinyPaneViewer))
+  shinyApp(ui, server)
 }

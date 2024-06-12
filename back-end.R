@@ -268,7 +268,7 @@ curve_graph <- function(database, blockOrMean, group.selected, time.scale){
         summarise(Readings = mean(Reading, na.rm = TRUE))
       
       graph <- ggplot(data = curve.data,
-                      aes(x = Date, y = Readings, group=Group))+
+                      aes(x = Date, y = Readings, color=Group))+
         geom_line()+
         geom_point()+
         ylab("Temperature °C")+
@@ -281,7 +281,7 @@ curve_graph <- function(database, blockOrMean, group.selected, time.scale){
         summarise(Readings = mean(Reading, na.rm = TRUE))
       
       graph <- ggplot(data = curve.data,
-                      aes(x = Week, y = Readings, group=Group))+
+                      aes(x = Week, y = Readings, color=Group))+
         geom_line()+
         geom_point()+
         ylab("Temperature °C")+
@@ -294,7 +294,7 @@ curve_graph <- function(database, blockOrMean, group.selected, time.scale){
         summarise(Readings = mean(Reading, na.rm = TRUE))
       
       graph <- ggplot(data = curve.data,
-                      aes(x = Month, y = Readings, group=1))+
+                      aes(x = Month, y = Readings, color=Group))+
         geom_line()+
         geom_point()+
         ylab("Temperature °C")+

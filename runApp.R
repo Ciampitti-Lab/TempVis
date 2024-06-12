@@ -9,4 +9,4 @@ source("app.R")
 
 # Run the application
 tempvis(file.source = "txt", file.path = "test.txt") # Local database
-#tempvis(file.source = "NoSQL", GET.API = "***************/obtain") # Remote database. Change the "*" to your API URL, but keep the "/obtain" endpoint
+#tempvis(file.source = "NoSQL", GET.API = "*************/obtain") # Remote database. Change the "*" to your API URL, but keep the "/obtain" endpoint

@@ -24,6 +24,9 @@ obtaining_data <- function(file.source, file.path = NULL, GET.API = NULL){
     colnames(txt.data) <- c("Group","Reading","DateTime")
     txt.data <- txt.data[,-4]
     
+    txt.data[txt.data==""]<-NA
+    txt.data <- txt.data %>% drop_na()
+    
     txt.data$Reading <- strsplit(as.character(txt.data$Reading), "/")
     txt.data <- cbind(txt.data[, -2], do.call(rbind, txt.data$Reading))
     txt.data$DateTime <- as.POSIXct(txt.data$DateTime, format = "%d/%m/%Y %H/%M")

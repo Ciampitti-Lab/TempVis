@@ -71,6 +71,9 @@ obtaining_data <- function(file.source, file.path = NULL, GET.API = NULL){
     database$Device <- as.numeric(database$Device)
     
   }
+  
+  database <- database[!(database$Reading == -127),]
+  
   return(database)
   
 }

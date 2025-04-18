@@ -1,5 +1,8 @@
 # TempVis
 
+## Contributors
+
+- Gustavo Nocera Santiago ([@GustavoSantiago113](https://github.com/GustavoSantiago113))
 
 ## Objective
 This is a digital tool developed using R Shiny to display the temperature readings obtained through a [Temperature Datalogger](https://github.com/GustavoSantiago113/Soil_Temperature_Datalogger) and save the data as a .csv file.
